@@ -1,61 +1,54 @@
-# 简介
-基于RBAC模型权限控制的中小型应用的基础开发平台,前后端分离,后端采用django+django-rest-framework,前端采用vue+ElementUI,移动端采用uniapp+uView(可发布h5和小程序).
+Introduction
+The basic development platform for small and medium-sized applications based on RBAC model permission control, the front and back ends are separated, the back-end adopts django+django-rest-framework, the front-end adopts vue+ElementUI, and the mobile terminal adopts uniapp+uView (can publish h5 and mini programs).
 
-JWT认证,可使用simple_history实现审计功能,支持swagger
+JWT certification, which can be used to implement auditing functions using simple_history, supports swagger
 
-内置模块有组织机构\用户\角色\岗位\数据字典\文件库\定时任务\工作流(已上传大部分代码, 后端代码位于apps/wf)
+The built-in modules include Organization\User\Role\Position\Data Dictionary\File Vault\Scheduled Task\Workflow (most of the code has been uploaded, and the backend code is located in apps/wf).
 
-使用工作流建议数据库用Postgresql, 下面的预览环境因为是用的sqlite因此有些json查询不支持, 使用方法可参考loonflow文档基本是一致, 主要是做了简化
+Use the workflow suggestion database with Postgresql, the following preview environment because it is used sqlite so some JSON queries do not support, the usage method can refer to the loonflow documentation is basically the same, mainly simplified
 
-支持功能权限(控权到每个接口)和简单的数据权限（全部、本级及以下、同级及以下、本人等）
+Supports functional permissions (control to each interface) and simple data permissions (all, this level and below, peers and below, me, etc
 
-欢迎提issue
+Welcome to the issue
 
+Partial screenshot
+image image image
 
-## 部分截图
-![image](https://github.com/caoqianming/django-vue-admin/blob/master/img/user.png)
-![image](https://github.com/caoqianming/django-vue-admin/blob/master/img/dict.png)
-![image](https://github.com/caoqianming/django-vue-admin/blob/master/img/task.png)
+Preview the address
+Preview the address directly used by runserver, account admin, password admin. Please exercise caution and do not change your password http://47.95.0.242:1111/
 
-## 预览地址
-预览地址直接使用的runserver,账户admin,密码admin。请谨慎操作,勿修改密码
-<http://47.95.0.242:1111/>
+Boot (here are the steps to develop under Windows).
+Django backend
+Navigate to the server folder
 
-## 启动(以下是在windows下开发操作步骤)
+Set up a virtual environment python -m venv venv
 
+Activate the virtual environment .\venv\scripts\activate
 
-### django后端
-定位到server文件夹
+Install dependent packages pip install -r requirements.txt
 
-建立虚拟环境 `python -m venv venv`
+Modify the database connection server\settings_dev.py
 
-激活虚拟环境 `.\venv\scripts\activate`
+Synchronize the database python manage.py migrate
 
-安装依赖包 `pip install -r requirements.txt`
+Initial data can be imported python manage.py loaddata db.json Or use the SQLite database directly (the password of the hypermanagement account is admin, and the database will be reset every once in a while).
 
-修改数据库连接 `server\settings_dev.py` 
+Create a super administrator python manage.py createsuperuser
 
-同步数据库 `python manage.py migrate`
+Run the service python manage.py runserver 8000
 
-可导入初始数据 `python manage.py loaddata db.json` 或直接使用sqlite数据库(超管账户密码均为admin,每隔一段时间数据库会重置)
+Vue frontend
+Navigate to the client folder
 
-创建超级管理员 `python manage.py createsuperuser`
+Install the node .js
 
-运行服务 `python manage.py runserver 8000` 
+Install dependent packages npm install --registry=https://registry.npm.taobao.org
 
-### vue前端
-定位到client文件夹
+Run the service npm run dev
 
-安装node.js
+nginx
+Modify nginx.conf
 
-安装依赖包 `npm install --registry=https://registry.npm.taobao.org`
-
-运行服务 `npm run dev` 
-
-### nginx
-修改nginx.conf
-
-```
 listen 8012
 location /media {
     proxy_pass http://localhost:8000;
@@ -63,78 +56,66 @@ location /media {
 location / {
     proxy_pass http://localhost:9528;
 }
-```
+Run nginx .exe
 
-运行nginx.exe
+Run
+Open localhost:8012 to access
 
-### 运行
-打开localhost:8012即可访问
+Interface documentation localhost:8000/docs
 
-接口文档 localhost:8000/docs
+Background address localhost:8000/admin
 
-后台地址 localhost:8000/admin
+Deployment
+The settings_pro.py was used when it was deployed. Pay attention to modifications
 
-## 部署
-部署时使用的是settings_pro.py。注意修改
+It can be deployed separately from the front and back ends, and the nginx agent. It can also be packaged and placed in the server/vuedist folder, and then executed collectstatic
 
-可以前后端分开部署, nginx代理。也可打包之后放在server/vuedist文件夹, 然后执行collectstatic
+Docker-compose mode runs
+Frontend ./client and backends ./server There are Dockerfiles in the directory, if you need to build the image separately, you can build it yourself.
 
-### docker-compose 方式运行
+Here we mainly talk about docker-compose starting this way.
 
-前端 `./client` 和后端 `./server` 目录下都有Dockerfile，如果需要单独构建镜像，可以自行构建。
+Modify the docker-compose.yml file as commented. There are two main services inside, one is backendBackend, one is frontendFront.
 
-这里主要说docker-compose启动这种方式。
+The default is to run the backend and frontend in development mode. If you need to deploy a single machine and want to use docker-compose, the performance will be better when you change to production mode.
 
-按照注释修改docker-compose.yml文件。里面主要有两个服务，一个是`backend`后端,一个是`frontend`前端。
+Start
 
-默认是用开发模式跑的后端和前端。如果需要单机部署，又想用docker-compose的话，改为生产模式性能会好些。
-
-
-启动
-```
 cd <path-to-your-project>
 docker-compose up -d
-```
+After successful startup, the access port is the same as the front, interface 8000 port, front-end port 8012, if you need to change, change docker-compose.yml
 
-启动成功后，访问端口同前面的，接口8000端口，前端8012端口，如需改动，自己改docker-compose.yml
+If you want to execute the command inside docker-compose exec < the service name > < command >
 
-如果要执行里面的命令
-docker-compose exec <服务名> <命令>
+Take a chestnut:
 
-举个栗子：
+If I want to execute a back-end generate data change command. python manage.py makemigrations
 
-如果我要执行后端生成数据变更命令。`python manage.py makemigrations`
+Then use the following statement
 
-则用如下语句
-
-```
 docker-compose exec backend python manage.py makemigrations
-```
+Philosophy
+First of all, you must be able to use the django-rest-framework to understand the vue-element-admin front-end solution
 
-### 理念
-首先得会使用django-rest-framework, 理解vue-element-admin前端方案
+This project adopts front-end routing, and the back-end reads the user permission code according to the user role and returns it to the frontend, which is loaded by the front-end (the core code is the perms attribute in the routing table and the checkpermission method).
 
-本项目采用前端路由，后端根据用户角色读取用户权限代码返回给前端，由前端进行加载(核心代码是路由表中的perms属性以及checkpermission方法)
+The core code for back-end functional permissions overrides has_permission methods under server/apps/system/permission.py to define perms permission code in APIView and ViewSet
 
-后端功能权限的核心代码在server/apps/system/permission.py下重写了has_permission方法, 在APIView和ViewSet中定义perms权限代码
+Because data permissions are related to specific businesses, several rules are simply defined and has_object_permission methods are rewritten; Use as needed
 
-数据权限因为跟具体业务有关,简单定义了几个规则,重写了has_object_permission方法;根据需要使用即可
+Due to the complexity of the actual situation, it is recommended to write the DRF permission_class according to different situations
 
-由于实际情况比较复杂，这里建议根据不同情况自己写drf的permission_class
+About scheduled tasks
+Implemented using celery as well as django_celery_beat packages
 
-### 关于定时任务
-使用celery以及django_celery_beat包实现
+Redis needs to be installed and started on the default port, and Worker and Beat started
 
-需要安装redis并在默认端口启动, 并启动worker以及beat
+Enter the virtual environment and start the worker: celery -A server worker -l info -P eventlet, Linux systems do not need to add -P eventlet
 
-进入虚拟环境并启动worker: `celery -A server worker -l info -P eventlet`, linux系统不用加-P eventlet
+Enter the virtual environment and start beat: celery -A server beat -l info
 
-进入虚拟环境并启动beat: `celery -A server beat -l info`
+Follow-up
+The workflow module can refer to the implementation of loonflow and check its documentation (same logic, thanks to loonflow) Most of the code has been uploaded, see swagger
 
-### 后续
-工作流模块参考loonflow的实现可查看其文档(逻辑一样, 感谢loonflow)
-目前大部分代码已上传, 可查看swagger
-
-### 下一步
-功能权限和数据权限的处理有大的优化空间, 可实现更加合理的权限划分, 但对目前代码改动较大，在考虑中
-
+Next steps
+The processing of functional permissions and data permissions has a large optimization space, which can achieve a more reasonable division of permissions, but the current code changes are large, which is under consideration
